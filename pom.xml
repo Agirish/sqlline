@@ -242,7 +242,7 @@
     <dependency>
       <groupId>net.hydromatic</groupId>
       <artifactId>scott-data-hsqldb</artifactId>
-      <version>${scott-data-hsqldb.version}</version>
+      <version>0.1</version>
       <scope>test</scope>
     </dependency>
     <dependency>

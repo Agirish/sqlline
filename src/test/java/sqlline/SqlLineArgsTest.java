@@ -44,6 +44,8 @@ import mockit.Expectations;
 import mockit.Mocked;
 import mockit.integration.junit4.JMockit;
 
+import net.hydromatic.scott.data.hsqldb.ScottHsqldb;
+
 import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.*;
 
