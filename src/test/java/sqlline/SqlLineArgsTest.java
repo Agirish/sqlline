@@ -44,8 +44,6 @@ import mockit.Expectations;
 import mockit.Mocked;
 import mockit.integration.junit4.JMockit;
 
-import net.hydromatic.scott.data.hsqldb.ScottHsqldb;
-
 import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.*;
 
@@ -77,6 +75,7 @@ public class SqlLineArgsTest {
     final InputStream is = new ByteArrayInputStream(new byte[0]);
     SqlLine.Status status = beeLine.begin(args, is, false);
 
+
     return new Pair(status, os.toString("UTF8"));
   }
 
@@ -89,10 +88,10 @@ public class SqlLineArgsTest {
       boolean flag) throws Throwable {
     List<String> args = new ArrayList<String>();
     Collections.addAll(args,
-        "-d", connectionSpec.driver,
-        "-u", connectionSpec.url,
-        "-n", connectionSpec.username,
-        "-p", connectionSpec.password);
+            "-d", CONNECTION_SPEC.driver,
+            "-u", CONNECTION_SPEC.url,
+            "-n", CONNECTION_SPEC.username,
+            "-p", CONNECTION_SPEC.password);
     if (flag) {
       args.add("-f");
       args.add(scriptFile.getAbsolutePath());
@@ -480,7 +479,15 @@ public class SqlLineArgsTest {
       }
       stringWriter.write(chars, 0, c);
     }
-    assertThat(toLinux(stringWriter.toString()), matcher);
+    assertThat(stringWriter.toString(),
+      RegexMatcher.of(
+       "Saving all output to \".*.log\". Enter \"record\" with no arguments to stop it.\n"
+       + "3/7          !set outputformat csv\n"
+       + "4/7          values 2;\n"
+       + "'C1'\n"
+       + "'2'\n"
+       + "1 row selected \\([0-9.]+ seconds\\)\n"
+       + "5/7          !record\n"));
   }
 
   /**
@@ -565,7 +572,52 @@ public class SqlLineArgsTest {
     assertThat(output, containsString("Generated Exception"));
   }
 
-  /**
+  @Test
+  public void testExecutionException(@Mocked final JDBCDatabaseMetaData meta,
+                 @Mocked final JDBCResultSet resultSet)  throws Throwable {
+    new Expectations() {
+      {
+        // prevent calls to functions that also call resultSet.next
+        meta.getDatabaseProductName(); result = "hsqldb";
+        // prevent calls to functions that also call resultSet.next
+        meta.getDatabaseProductVersion(); result = "1.0";
+        // Generate an exception on a call to resultSet.next
+        resultSet.next(); result = new SQLException("Generated Exception.");
+      }
+    };
+    SqlLine sqlLine = new SqlLine();
+    ByteArrayOutputStream os = new ByteArrayOutputStream();
+    PrintStream sqllineOutputStream = new PrintStream(os);
+    sqlLine.setOutputStream(sqllineOutputStream);
+    sqlLine.setErrorStream(sqllineOutputStream);
+    String[] args = {
+      "-d",
+      "org.hsqldb.jdbcDriver",
+      "-u",
+      "jdbc:hsqldb:res:scott",
+      "-n",
+      "SCOTT",
+      "-p",
+      "TIGER"
+    };
+    DispatchCallback callback = new DispatchCallback();
+    sqlLine.initArgs(args, callback);
+    // If sqlline is not initialized, handleSQLException will print
+    // the entire stack trace.
+    // To prevent that, forcibly set init to true.
+    Deencapsulation.setField(sqlLine, "initComplete", true);
+    sqlLine.getConnection();
+    sqlLine.runCommands(
+        Arrays.asList("CREATE TABLE rsTest ( a int);",
+            "insert into rsTest values (1);",
+            "insert into rsTest values (2);",
+            "select a from rsTest; "),
+        callback);
+    String output = os.toString("UTF8");
+    assertThat(output, containsString("Generated Exception"));
+  }
+
+    /**
    * Attempts to execute a missing script file with the -f option to SqlLine.
    */
   @Test
