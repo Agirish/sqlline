@@ -11,16 +11,50 @@
 */
 package sqlline;
 
-import java.io.*;
-import java.lang.reflect.*;
-import java.net.*;
-import java.sql.*;
-import java.text.*;
-import java.util.*;
+import java.io.EOFException;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.PrintStream;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
+import java.net.JarURLConnection;
+import java.net.URL;
+import java.net.URLConnection;
+import java.sql.Connection;
+import java.sql.DatabaseMetaData;
+import java.sql.Driver;
+import java.sql.DriverManager;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.SQLWarning;
+import java.sql.Statement;
+import java.text.ChoiceFormat;
+import java.text.MessageFormat;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
-import java.util.jar.*;
+import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Properties;
+import java.util.ResourceBundle;
+import java.util.Set;
+import java.util.SortedSet;
+import java.util.StringTokenizer;
+import java.util.TreeMap;
+import java.util.TreeSet;
+import java.util.jar.Attributes;
+import java.util.jar.Manifest;
 
-import jline.*;
+import jline.Terminal;
+import jline.TerminalFactory;
 import jline.console.ConsoleReader;
 import jline.console.UserInterruptException;
 import jline.console.completer.Completer;
@@ -88,6 +122,7 @@ public class SqlLine {
   final List<CommandHandler> commandHandlers;
 
   static final SortedSet<String> KNOWN_DRIVERS = new TreeSet<String>(
+<<<<<<< HEAD
       Arrays.asList(
           "centura.java.sqlbase.SqlbaseDriver",
           "com.amazonaws.athena.jdbc.AthenaDriver",
@@ -149,6 +184,9 @@ public class SqlLine {
           "sun.jdbc.odbc.JdbcOdbcDriver",
           "weblogic.jdbc.mssqlserver4.Driver",
           "weblogic.jdbc.pool.Driver"));
+=======
+      Arrays.asList("org.apache.drill.jdbc.Driver"));
+>>>>>>> customizations for drill
 
   static {
     String testClass = "jline.console.ConsoleReader";
@@ -215,7 +253,8 @@ public class SqlLine {
     return loc(
         "app-introduction",
         properties.getProperty("artifactId"),
-        properties.getProperty("version"));
+        // properties.getProperty("version")
+        "1.0.0");
   }
 
   static String getApplicationContactInformation() {
@@ -295,26 +334,26 @@ public class SqlLine {
             "connect", "open"),
         new ReflectiveCommandHandler(this, empty, "nickname"),
         new ReflectiveCommandHandler(this, tableCompleter, "describe"),
-        new ReflectiveCommandHandler(this, tableCompleter, "indexes"),
-        new ReflectiveCommandHandler(this, tableCompleter, "primarykeys"),
-        new ReflectiveCommandHandler(this, tableCompleter, "exportedkeys"),
-        new ReflectiveCommandHandler(this, empty, "manual"),
-        new ReflectiveCommandHandler(this, tableCompleter, "importedkeys"),
-        new ReflectiveCommandHandler(this, empty, "procedures"),
+        // new ReflectiveCommandHandler(this, tableCompleter, "indexes"),
+        // new ReflectiveCommandHandler(this, tableCompleter, "primarykeys"),
+        // new ReflectiveCommandHandler(this, tableCompleter, "exportedkeys"),
+        // new ReflectiveCommandHandler(this, empty, "manual"),
+        // new ReflectiveCommandHandler(this, tableCompleter, "importedkeys"),
+        // new ReflectiveCommandHandler(this, empty, "procedures"),
         new ReflectiveCommandHandler(this, empty, "tables"),
-        new ReflectiveCommandHandler(this, empty, "typeinfo"),
+        // new ReflectiveCommandHandler(this, empty, "typeinfo"),
         new ReflectiveCommandHandler(this, tableCompleter, "columns"),
         new ReflectiveCommandHandler(this, empty, "reconnect"),
-        new ReflectiveCommandHandler(this, tableCompleter, "dropall"),
+        // new ReflectiveCommandHandler(this, tableCompleter, "dropall"),
         new ReflectiveCommandHandler(this, empty, "history"),
         new ReflectiveCommandHandler(this,
             new StringsCompleter(getMetadataMethodNames()), "metadata"),
-        new ReflectiveCommandHandler(this, empty, "nativesql"),
+        // new ReflectiveCommandHandler(this, empty, "nativesql"),
         new ReflectiveCommandHandler(this, empty, "dbinfo"),
-        new ReflectiveCommandHandler(this, empty, "rehash"),
+        // new ReflectiveCommandHandler(this, empty, "rehash"),
         new ReflectiveCommandHandler(this, empty, "verbose"),
         new ReflectiveCommandHandler(this, new FileNameCompleter(), "run"),
-        new ReflectiveCommandHandler(this, empty, "batch"),
+        // new ReflectiveCommandHandler(this, empty, "batch"),
         new ReflectiveCommandHandler(this, empty, "list"),
         new ReflectiveCommandHandler(this, empty, "all"),
         new ReflectiveCommandHandler(this, empty, "go", "#"),
@@ -327,11 +366,11 @@ public class SqlLine {
             new StringsCompleter(getIsolationLevels()), "isolation"),
         new ReflectiveCommandHandler(this,
             new StringsCompleter(formats.keySet()), "outputformat"),
-        new ReflectiveCommandHandler(this, empty, "autocommit"),
-        new ReflectiveCommandHandler(this, empty, "commit"),
+        // new ReflectiveCommandHandler(this, empty, "autocommit"),
+        // new ReflectiveCommandHandler(this, empty, "commit"),
         new ReflectiveCommandHandler(this, new FileNameCompleter(),
             "properties"),
-        new ReflectiveCommandHandler(this, empty, "rollback"),
+        // new ReflectiveCommandHandler(this, empty, "rollback"),
         new ReflectiveCommandHandler(this, empty, "help", "?"),
         new ReflectiveCommandHandler(this, opts.optionCompleters(), "set"),
         new ReflectiveCommandHandler(this, empty, "save"),
@@ -426,44 +465,7 @@ public class SqlLine {
   }
 
   public List<String> getConnectionURLExamples() {
-    return Arrays.asList(
-      "jdbc:JSQLConnect://<hostname>/database=<database>",
-      "jdbc:cloudscape:<database>;create=true",
-      "jdbc:twtds:sqlserver://<hostname>/<database>",
-      "jdbc:daffodilDB_embedded:<database>;create=true",
-      "jdbc:datadirect:db2://<hostname>:50000;databaseName=<database>",
-      "jdbc:inetdae:<hostname>:1433",
-      "jdbc:datadirect:oracle://<hostname>:1521;SID=<database>;"
-          + "MaxPooledStatements=0",
-      "jdbc:datadirect:sqlserver://<hostname>:1433;SelectMethod=cursor;"
-          + "DatabaseName=<database>",
-      "jdbc:datadirect:sybase://<hostname>:5000",
-      "jdbc:db2://<hostname>/<database>",
-      "jdbc:hsqldb:<database>",
-      "jdbc:idb:<database>.properties",
-      "jdbc:informix-sqli://<hostname>:1526/<database>:INFORMIXSERVER"
-          + "=<database>",
-      "jdbc:interbase://<hostname>//<database>.gdb",
-      "jdbc:luciddb:http://<hostname>",
-      "jdbc:microsoft:sqlserver://<hostname>:1433;"
-          + "DatabaseName=<database>;SelectMethod=cursor",
-      "jdbc:mysql://<hostname>/<database>?autoReconnect=true",
-      "jdbc:oracle:thin:@<hostname>:1521:<database>",
-      "jdbc:pointbase:<database>,database.home=<database>,create=true",
-      "jdbc:postgresql://<hostname>:5432/<database>",
-      "jdbc:postgresql:net//<hostname>/<database>",
-      "jdbc:sybase:Tds:<hostname>:4100/<database>?ServiceName=<database>",
-      "jdbc:weblogic:mssqlserver4:<database>@<hostname>:1433",
-      "jdbc:odbc:<database>",
-      "jdbc:sequelink://<hostname>:4003/[Oracle]",
-      "jdbc:sequelink://<hostname>:4004/[Informix];Database=<database>",
-      "jdbc:sequelink://<hostname>:4005/[Sybase];Database=<database>",
-      "jdbc:sequelink://<hostname>:4006/[SQLServer];Database=<database>",
-      "jdbc:sequelink://<hostname>:4011/[ODBC MS Access];"
-          + "Database=<database>",
-      "jdbc:openlink://<hostname>/DSN=SQLServerDB/UID=sa/PWD=",
-      "jdbc:solid://<hostname>:<port>/<UID>/<PWD>",
-      "jdbc:dbaw://<hostname>:8889/<database>");
+    return Arrays.asList("jdbc:drill:", "jdbc:drill:zk=local");
   }
 
   /**
