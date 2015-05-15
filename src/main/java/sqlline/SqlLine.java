@@ -44,6 +44,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.Random;
 import java.util.ResourceBundle;
 import java.util.Set;
 import java.util.SortedSet;
@@ -122,72 +123,8 @@ public class SqlLine {
   final List<CommandHandler> commandHandlers;
 
   static final SortedSet<String> KNOWN_DRIVERS = new TreeSet<String>(
-<<<<<<< HEAD
-      Arrays.asList(
-          "centura.java.sqlbase.SqlbaseDriver",
-          "com.amazonaws.athena.jdbc.AthenaDriver",
-          "COM.cloudscape.core.JDBCDriver",
-          "com.ddtek.jdbc.db2.DB2Driver",
-          "com.ddtek.jdbc.informix.InformixDriver",
-          "com.ddtek.jdbc.oracle.OracleDriver",
-          "com.ddtek.jdbc.sqlserver.SQLServerDriver",
-          "com.ddtek.jdbc.sybase.SybaseDriver",
-          "COM.FirstSQL.Dbcp.DbcpDriver",
-          "com.ibm.as400.access.AS400JDBCDriver",
-          "com.ibm.db2.jcc.DB2Driver",
-          "COM.ibm.db2.jdbc.app.DB2Driver",
-          "COM.ibm.db2.jdbc.net.DB2Driver",
-          "com.imaginary.sql.msql.MsqlDriver",
-          "com.inet.tds.TdsDriver",
-          "com.informix.jdbc.IfxDriver",
-          "com.internetcds.jdbc.tds.Driver",
-          "com.internetcds.jdbc.tds.SybaseDriver",
-          "com.jnetdirect.jsql.JSQLDriver",
-          "com.lucidera.jdbc.LucidDbRmiDriver",
-          "com.mckoi.JDBCDriver",
-          "com.merant.datadirect.jdbc.db2.DB2Driver",
-          "com.merant.datadirect.jdbc.informix.InformixDriver",
-          "com.merant.datadirect.jdbc.oracle.OracleDriver",
-          "com.merant.datadirect.jdbc.sqlserver.SQLServerDriver",
-          "com.merant.datadirect.jdbc.sybase.SybaseDriver",
-          "com.microsoft.jdbc.sqlserver.SQLServerDriver",
-          "com.mysql.jdbc.DatabaseMetaData",
-          "com.mysql.jdbc.Driver",
-          "com.mysql.jdbc.NonRegisteringDriver",
-          "com.pointbase.jdbc.jdbcDriver",
-          "com.pointbase.jdbc.jdbcEmbeddedDriver",
-          "com.pointbase.jdbc.jdbcUniversalDriver",
-          "com.sap.dbtech.jdbc.DriverSapDB",
-          "com.sqlstream.jdbc.Driver",
-          "com.sybase.jdbc2.jdbc.SybDriver",
-          "com.sybase.jdbc.SybDriver",
-          "com.thinweb.tds.Driver",
-          "in.co.daffodil.db.jdbc.DaffodilDBDriver",
-          "interbase.interclient.Driver",
-          "intersolv.jdbc.sequelink.SequeLinkDriver",
-          "net.sourceforge.jtds.jdbc.Driver",
-          "openlink.jdbc2.Driver",
-          "oracle.jdbc.driver.OracleDriver",
-          "oracle.jdbc.OracleDriver",
-          "oracle.jdbc.pool.OracleDataSource",
-          "org.axiondb.jdbc.AxionDriver",
-          "org.enhydra.instantdb.jdbc.idbDriver",
-          "org.gjt.mm.mysql.Driver",
-          "org.hsqldb.jdbcDriver",
-          "org.hsql.jdbcDriver",
-          "org.luciddb.jdbc.LucidDbClientDriver",
-          "org.postgresql.Driver",
-          "org.sourceforge.jxdbcon.JXDBConDriver",
-          "postgres95.PGDriver",
-          "postgresql.Driver",
-          "solid.jdbc.SolidDriver",
-          "sun.jdbc.odbc.JdbcOdbcDriver",
-          "weblogic.jdbc.mssqlserver4.Driver",
-          "weblogic.jdbc.pool.Driver"));
-=======
       Arrays.asList("org.apache.drill.jdbc.Driver"));
->>>>>>> customizations for drill
-
+  
   static {
     String testClass = "jline.console.ConsoleReader";
     try {
@@ -254,8 +191,24 @@ public class SqlLine {
         "app-introduction",
         properties.getProperty("artifactId"),
         // properties.getProperty("version")
-        "1.0.0");
+        "1.0.0",
+        QOD[new Random().nextInt(QOD.length)]);
   }
+
+  static final String[] QOD = {
+    "start your sql engine",
+    "this isn't your grandfather's sql",
+    "a little sql for your nosql",
+    "json ain't no thang",
+    "drill baby drill",
+    "just drill it",
+    "say hello to my little drill",
+    "what ever the mind of man can conceive and believe, drill can query",
+    "the only truly happy people are children, the creative minority and drill users",
+    "a drill is a terrible thing to waste",
+    "got drill?",
+    "a drill in the hand is better than two in the bush"
+  };
 
   static String getApplicationContactInformation() {
     return getManifestAttribute("Implementation-Vendor");
@@ -332,8 +285,7 @@ public class SqlLine {
         new ReflectiveCommandHandler(this,
             new StringsCompleter(getConnectionURLExamples()),
             "connect", "open"),
-        new ReflectiveCommandHandler(this, empty, "nickname"),
-        new ReflectiveCommandHandler(this, tableCompleter, "describe"),
+        // new ReflectiveCommandHandler(this, tableCompleter, "describe"),
         // new ReflectiveCommandHandler(this, tableCompleter, "indexes"),
         // new ReflectiveCommandHandler(this, tableCompleter, "primarykeys"),
         // new ReflectiveCommandHandler(this, tableCompleter, "exportedkeys"),
